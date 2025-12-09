@@ -1,0 +1,83 @@
+const User = require("../models/User");
+
+// GET /api/users/me
+// returns the currently logged-in user's profile
+exports.getMyProfile = async (req, res) => {
+  try {
+    // req.user is already attached by protect middleware
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    res.json({
+      _id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      skills: req.user.skills,
+      location: req.user.location,
+      bio: req.user.bio,
+      createdAt: req.user.createdAt,
+      updatedAt: req.user.updatedAt,
+    });
+  } catch (err) {
+    console.error("getMyProfile error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// PUT /api/users/me
+// updates profile fields: name, skills, bio, location
+exports.updateMyProfile = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const { name, skills, bio, location } = req.body;
+
+    const updateData = {};
+
+    if (name) updateData.name = name;
+    if (typeof bio === "string") updateData.bio = bio;
+    if (typeof location === "string") updateData.location = location;
+
+    // handle skills: can be array or comma-separated string
+    if (Array.isArray(skills)) {
+      updateData.skills = skills;
+    } else if (typeof skills === "string" && skills.trim() !== "") {
+      updateData.skills = skills.split(",").map((s) => s.trim());
+    }
+
+    // do NOT allow email or password change here in M1
+    // ignore email/password if sent from frontend
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      updateData,
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        skills: updatedUser.skills,
+        location: updatedUser.location,
+        bio: updatedUser.bio,
+        createdAt: updatedUser.createdAt,
+        updatedAt: updatedUser.updatedAt,
+      },
+    });
+  } catch (err) {
+    console.error("updateMyProfile error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
