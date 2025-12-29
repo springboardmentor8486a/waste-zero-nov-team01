@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 node_modules/
 /.env
 backend/.env
@@ -14,6 +13,3 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-=======
-node_modules
->>>>>>> ec01d7f (my first commit)
