@@ -20,9 +20,10 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password, role, skills, location, bio } = req.body;
 
-    // basic validations
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "Name, email and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Name, email and password are required" });
     }
 
     if (!validator.isEmail(email)) {
@@ -30,28 +31,27 @@ exports.register = async (req, res) => {
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters" });
     }
 
-    // allowed roles for M1
     const allowedRoles = ["volunteer", "ngo"];
-    const finalRole = allowedRoles.includes(role) ? role : "volunteer";
+    const finalRole = allowedRoles.includes(role?.toLowerCase())
+      ? role.toLowerCase()
+      : "volunteer";
 
-    // check if email already exists
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
       return res.status(400).json({ message: "Email is already registered" });
     }
 
-    // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // normalize skills to array
     let skillsArray = [];
     if (Array.isArray(skills)) {
       skillsArray = skills;
     } else if (typeof skills === "string" && skills.trim() !== "") {
-      // if frontend sends "recycling, cleaning"
       skillsArray = skills.split(",").map((s) => s.trim());
     }
 
@@ -75,7 +75,6 @@ exports.register = async (req, res) => {
   } catch (err) {
     console.error("Register error:", err);
 
-    // handle duplicate email error
     if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
       return res.status(400).json({ message: "Email already in use" });
     }
@@ -89,12 +88,15 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // basic validation
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    const user = await User.findOne({ email: email.toLowerCase() }).select(
+      "+password"
+    );
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
@@ -105,12 +107,12 @@ exports.login = async (req, res) => {
     }
 
     if (user.isSuspended) {
-      return res.status(403).json({ message: "Your account is suspended. Contact admin." });
+      return res
+        .status(403)
+        .json({ message: "Your account is suspended. Contact admin." });
     }
 
     const token = generateToken(user._id);
-
-    // remove password from response manually
     user.password = undefined;
 
     res.json({
@@ -124,10 +126,49 @@ exports.login = async (req, res) => {
   }
 };
 
+// POST /api/auth/change-password
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Current and new password are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "New password must be at least 6 characters" });
+    }
+
+    // req.user.id should be set by auth middleware (protect)
+    const user = await User.findById(req.user.id).select("+password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("ChangePassword error:", err);
+    res
+      .status(500)
+      .json({ message: "Server error while updating password" });
+  }
+};
+
 // GET /api/auth/me
 exports.getMe = async (req, res) => {
   try {
-    // req.user will be populated by authMiddleware (we'll add it in next step)
     if (!req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }

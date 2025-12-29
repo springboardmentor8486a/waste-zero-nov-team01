@@ -1,0 +1,110 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Times New Roman", serif;
+}
+
+/* Layout */
+body {
+  display: flex;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #f0f0f0;
+  padding: 20px 15px;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+}
+
+.main {
+  flex: 1;
+  position: relative;
+  background-color: #fafafa;
+}
+
+/* Logo + title */
+.logo-section {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 5px;
+}
+
+.logo-section h2 {
+  font-size: 20px;
+  text-transform: lowercase;
+}
+
+.tagline {
+  font-size: 11px;
+}
+
+/* Menu */
+.menu-title {
+  font-size: 13px;
+  margin: 15px 0 5px;
+}
+
+.menu-list {
+  list-style: none;
+  margin-bottom: 10px;
+}
+
+.menu-list li {
+  background-color: #e6e6e6;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.menu-list li:hover {
+  background-color: #d2d2d2;
+}
+
+/* Top-right profile */
+.top-bar {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+}
+
+.profile-text {
+  font-size: 14px;
+}
+
+/* Center welcome text */
+.welcome-wrapper {
+  height: 100%;
+  display: flex;
+  justify-content: center;   /* horizontal */
+  align-items: center;       /* vertical */
+}
+
+.welcome-wrapper h1 {
+  font-size: 40px;
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 4px #bbb;
+}

@@ -1,13 +1,15 @@
+// backend/src/server.js
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
-
+const opportunityRoutes = require("./routes/opportunityRoutes");
+const errorHandler = require("./middleware/errorMiddleware");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-
+const messagesRoutes = require("./routes/messages");
 
 
 // connect to database
@@ -17,30 +19,37 @@ const app = express();
 
 // basic security middlewares
 app.use(helmet());
+
+// CORS – FRONTEND PORT EKKADA RUN AVUTUNDO DANE IKKADA PETTU
 app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP
+  cors({
+    origin: true, // or 5126 unte "http://localhost:5126"
+    credentials: true,
   })
 );
 
-// enable CORS for frontend (for now allow all)
-app.use(cors());
-
-// parse JSON body
 app.use(express.json());
+
+// rate limiter
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+  })
+);
+
+// API routes
+app.use("/api/opportunities", opportunityRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/messages", messagesRoutes);
 
+// error handler
+app.use(errorHandler);
 
-
-// simple health check route
-app.get("/", (req, res) => {
-  res.json({ message: "WasteZero backend is running." });
-});
-
-
+// start server – ONLY here
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`   Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
