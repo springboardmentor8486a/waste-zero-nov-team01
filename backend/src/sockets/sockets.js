@@ -1,3 +1,4 @@
+// websockets
 const jwt = require("jsonwebtoken");
 
 const socketHandler = (io) => {
