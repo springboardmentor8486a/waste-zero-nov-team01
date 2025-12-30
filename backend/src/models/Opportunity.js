@@ -21,10 +21,6 @@ const opportunitySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    date: {
-      type: Date,
-      required: true,
-    },
     location: {
       type: String,
       required: true,
@@ -34,7 +30,6 @@ const opportunitySchema = new mongoose.Schema(
       enum: ["open", "closed", "in-progress"],
       default: "open",
     },
-    
     ngo_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
