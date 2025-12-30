@@ -1,16 +1,21 @@
-// backend/src/server.js
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const http = require("http");
+const { Server } = require("socket.io");
+
 const connectDB = require("./config/db");
-const opportunityRoutes = require("./routes/opportunityRoutes");
-const errorHandler = require("./middleware/errorMiddleware");
+
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-const messagesRoutes = require("./routes/messages");
+const opportunityRoutes = require("./routes/opportunityRoutes");
+const matchRoutes = require("./routes/matchRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 
+const errorHandler = require("./middleware/errorMiddleware");
+const socketHandler = require("./sockets/sockets");
 
 // connect to database
 connectDB();
@@ -19,37 +24,52 @@ const app = express();
 
 // basic security middlewares
 app.use(helmet());
-
-// CORS – FRONTEND PORT EKKADA RUN AVUTUNDO DANE IKKADA PETTU
-app.use(
-  cors({
-    origin: true, // or 5126 unte "http://localhost:5126"
-    credentials: true,
-  })
-);
-
-app.use(express.json());
-
-// rate limiter
 app.use(
   rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP
   })
 );
 
-// API routes
-app.use("/api/opportunities", opportunityRoutes);
+// enable CORS for frontend
+app.use(cors());
+
+// parse JSON body
+app.use(express.json());
+
+// ================= ROUTES =================
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/messages", messagesRoutes);
+app.use("/api/opportunities", opportunityRoutes);
+app.use("/api/matches", matchRoutes);
+app.use("/api/messages", messageRoutes);
 
-// error handler
+// simple health check route
+app.get("/", (req, res) => {
+  res.json({ message: "WasteZero backend is running." });
+});
+
+// error handler (after all routes)
 app.use(errorHandler);
 
-// start server – ONLY here
-const PORT = process.env.PORT || 5000;
+// ================ SOCKET SETUP =================
+const server = http.createServer(app);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // replace with frontend URL in prod
+    methods: ["GET", "POST"],
+  },
+});
+
+// make io accessible in controllers
+app.set("io", io);
+
+// initialize socket handlers
+socketHandler(io);
+
+// ================= START SERVER =================
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`  # Server running on port ${PORT}`);
 });
