@@ -4,7 +4,7 @@ const Opportunity = require("../models/Opportunity");
 // @route   POST /api/opportunities
 exports.createOpportunity = async (req, res, next) => {
   try {
-    const { title, description, required_skills, date, duration, location, status } =
+    const { title, description, required_skills, duration, location, status } =
       req.body;
 
     if (!title || !description || !duration || !location) {
@@ -15,11 +15,9 @@ exports.createOpportunity = async (req, res, next) => {
       title,
       description,
       required_skills,
-      date,
       duration,
       location,
       status,
-      
       ngo_id: req.user._id, // from JWT
     });
 
@@ -87,7 +85,6 @@ exports.updateOpportunity = async (req, res, next) => {
       "title",
       "description",
       "required_skills",
-      "date",
       "duration",
       "location",
       "status",
