@@ -14,7 +14,29 @@ export const AuthProvider = ({ children }) => {
     const stored = localStorage.getItem("wastezero_user");
     const token = localStorage.getItem("wastezero_token");
     if (stored && token) {
-      setUser(JSON.parse(stored));
+      const parsed = JSON.parse(stored);
+      setUser(parsed);
+
+      // If stored profile is missing fields, try to refresh from the API
+      if ((!parsed.name || !parsed.location) && token) {
+        api
+          .get("/users/me")
+          .then((res) => {
+            const full = res.data || {};
+            const refreshed = {
+              id: full._id || full.id,
+              email: full.email,
+              role: full.role,
+              name: full.name,
+              location: full.location,
+            };
+            setUser(refreshed);
+            localStorage.setItem("wastezero_user", JSON.stringify(refreshed));
+          })
+          .catch(() => {
+            // not critical — continue with stored user
+          });
+      }
     }
     setLoading(false);
   }, []);
@@ -34,12 +56,14 @@ export const AuthProvider = ({ children }) => {
       id: data.user._id || data.user.id,
       email: data.user.email,
       role: data.user.role,
+      name: data.user.name,
+      location: data.user.location,
     };
 
     setUser(cleanUser);
     localStorage.setItem("wastezero_user", JSON.stringify(cleanUser));
     localStorage.setItem("wastezero_token", data.token);
-  };
+  }; 
 
   const logout = () => {
     setUser(null);

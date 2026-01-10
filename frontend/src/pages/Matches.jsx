@@ -158,7 +158,7 @@ const Matches = () => {
         {user?.role === 'ngo' ? (
           <>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Matched Volunteers</h1>
-            <p className="text-gray-600">Found {matches.length} volunteer(s) matching your opportunities</p>
+            <p className="text-gray-600">Found {matches.length} match(es) to your opportunities</p>
           </>
         ) : (
           <>

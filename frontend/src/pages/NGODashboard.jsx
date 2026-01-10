@@ -63,11 +63,7 @@ const ActivityItem = ({ item }) => {
           <p className="text-xs text-gray-400">{formatDistanceToNow(when, { addSuffix: true })}</p>
         </div>
         <p className="text-sm text-gray-600 mt-1 truncate">{item.subtitle}</p>
-        {item.link && (
-          <Link to={item.link} className="text-xs text-blue-600 hover:underline mt-1 inline-block">
-            View
-          </Link>
-        )}
+
       </div>
     </div>
   );
