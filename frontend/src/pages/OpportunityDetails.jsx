@@ -292,10 +292,13 @@ function OpportunityDetails() {
   ) : (
     <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
       {matches.map((v, index) => {
-        // Backend nundi vachina ID ni extract chestunnam
-        const vId = v.volunteerId?._id || v.volunteerId || v._id;
-        const vName = v.volunteerId?.name || v.name || "Volunteer";
-        const vSkills = v.volunteerId?.skills || v.skills || [];
+        // Normalize backend response: support { volunteer: {...}, score } and older shapes
+        const vol = v.volunteer || v.volunteerId || v;
+        const vId = vol?._id || vol?.id || v._id || v.id || index;
+        const vName = vol?.name || v.name || "Volunteer";
+        const vSkills = vol?.skills || v.skills || [];
+        const vLocation = vol?.location || v.location || "Remote";
+        const score = v.score ?? v.matchScore ?? null;
 
         return (
           <div
@@ -303,21 +306,25 @@ function OpportunityDetails() {
             className="rounded-lg border border-gray-200 p-3 bg-white shadow-sm hover:border-blue-300 transition-colors"
           >
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-600">
+              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
                 {vName.charAt(0).toUpperCase()}
               </div>
-              <p className="text-xs font-bold text-gray-900 truncate">
-                {vName}
-              </p>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-gray-900 truncate">{vName}</p>
+                {score !== null && (
+                  <div className="text-xs text-gray-500">Match score: <span className="font-semibold text-gray-700">{score}</span></div>
+                )}
+              </div>
             </div>
-            
-            <p className="text-[10px] text-gray-500 flex items-center gap-1">
-              📍 {v.volunteerId?.location || v.location || "Remote"}
+
+            <p className="text-[11px] text-gray-500 flex items-center gap-1">
+              📍 {vLocation}
             </p>
-            
+
             <div className="mt-2 flex flex-wrap gap-1">
-              {Array.isArray(vSkills) && vSkills.slice(0, 2).map((s, i) => (
-                <span key={i} className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-[9px] rounded">
+              {Array.isArray(vSkills) && vSkills.slice(0, 3).map((s, i) => (
+                <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[11px] rounded">
                   {s}
                 </span>
               ))}
@@ -325,7 +332,7 @@ function OpportunityDetails() {
 
             <button
               onClick={() => navigate(`/chat/${vId}`)}
-              className="mt-3 w-full py-1.5 rounded-md bg-emerald-500 text-white text-[10px] font-bold hover:bg-emerald-600 shadow-sm transition-all"
+              className="mt-3 w-full py-2 rounded-md bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 shadow-sm transition-all"
             >
               Message Volunteer
             </button>
