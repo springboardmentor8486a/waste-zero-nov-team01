@@ -189,9 +189,8 @@ const Ngodashboard = () => {
           </div>
 
           <div className="mt-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">
               Recent Activity
-              <Link to="/opportunities" className="text-xs text-slate-500 hover:underline">View all</Link>
             </h3>
             {loading && <p className="text-sm text-gray-500">Loading activity…</p>}
             {error && <p className="text-sm text-red-500">{error}</p>}
