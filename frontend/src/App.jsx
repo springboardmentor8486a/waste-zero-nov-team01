@@ -18,6 +18,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
+import Ngodashboard from "./pages/NGODashboard";
 import Opportunities from "./pages/Opportunities";
 import OpportunityDetails from "./pages/OpportunityDetails";
 import CreateOpportunity from "./pages/CreateOpportunity";
@@ -32,6 +33,7 @@ import Matches from "./pages/Matches";
 
 import Chat from "./pages/Chat";
 import VolunteerDashboard from "./pages/VolunteerDashboard";
+
 
 function App() {
   return (
@@ -58,7 +60,7 @@ function App() {
                   index
                   element={
                     <ProtectedRoute allowedRoles={["ngo"]}>
-                      <Dashboard />
+                      <Ngodashboard />
                     </ProtectedRoute>
                   }
                 />
@@ -66,7 +68,7 @@ function App() {
                   path="dashboard"
                   element={
                     <ProtectedRoute allowedRoles={["ngo"]}>
-                      <Dashboard />
+                      <Ngodashboard />
                     </ProtectedRoute>
                   }
                 />

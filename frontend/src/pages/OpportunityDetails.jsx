@@ -30,9 +30,15 @@ function OpportunityDetails() {
 
   useEffect(() => {
     fetchOpportunity();
-    fetchMatches();
+    // Only fetch matches if logged in as NGO (matches/:id requires NGO auth)
+    if (user?.role === "ngo") {
+      fetchMatches();
+    } else {
+      setMatches([]);
+      setMatchesLoading(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, user?.role]);
 
   const fetchOpportunity = async () => {
     try {
@@ -61,11 +67,21 @@ function OpportunityDetails() {
   const fetchMatches = async () => {
     try {
       setMatchesLoading(true);
+      const token = localStorage.getItem("wastezero_token");
       const res = await fetch(
-        `http://localhost:5000/api/matches/${id}`
+        `http://localhost:5000/api/matches/${id}`,
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
       );
 
       if (!res.ok) {
+        // 401 / 403 are expected if not authorized or not owner — handle gracefully
+        if (res.status === 401) {
+          console.warn("Matches API returned 401 — not authenticated for matches endpoint");
+        } else if (res.status === 403) {
+          console.warn("Matches API returned 403 — you are not the owner of this opportunity");
+        }
         setMatches([]);
         return;
       }
