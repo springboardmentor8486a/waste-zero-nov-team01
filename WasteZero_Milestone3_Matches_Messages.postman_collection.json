@@ -1,0 +1,191 @@
+{
+  "info": {
+    "name": "WasteZero Matches & Messaging API (Milestone 3)",
+    "description": "Collection for testing WasteZero backend matching and real-time messaging APIs (Milestone 3)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Matches for Volunteer",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{vol_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/matches",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "matches"]
+        },
+        "description": "Volunteer fetches matched opportunities based on skills and location."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Matches for NGO (By Opportunity)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ngo_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/matches/{{opportunityId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "matches", "{{opportunityId}}"]
+        },
+        "description": "NGO fetches matched volunteers for a specific opportunity."
+      },
+      "response": []
+    },
+    {
+      "name": "Send Message (Volunteer → NGO)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{vol_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"receiver_id\": \"{{ngo_user_id}}\",\n  \"content\": \"Hello! I am interested in your opportunity.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/messages",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "messages"]
+        },
+        "description": "Volunteer sends message to NGO."
+      },
+      "response": []
+    },
+    {
+      "name": "Send Message (NGO → Volunteer)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ngo_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"receiver_id\": \"{{vol_user_id}}\",\n  \"content\": \"Thanks for your interest! Let’s connect.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/messages",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "messages"]
+        },
+        "description": "NGO sends message to Volunteer."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Message History (Volunteer ↔ NGO)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{vol_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/messages/{{ngo_user_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "messages", "{{ngo_user_id}}"]
+        },
+        "description": "Volunteer fetches chat history with NGO."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Message History (NGO ↔ Volunteer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{ngo_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/messages/{{vol_user_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "messages", "{{vol_user_id}}"]
+        },
+        "description": "NGO fetches chat history with Volunteer."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "ngo_token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token of NGO user."
+    },
+    {
+      "key": "vol_token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token of Volunteer user."
+    },
+    {
+      "key": "opportunityId",
+      "value": "",
+      "type": "string",
+      "description": "Opportunity ID created in Milestone 2."
+    },
+    {
+      "key": "ngo_user_id",
+      "value": "",
+      "type": "string",
+      "description": "User ID of NGO (from login response)."
+    },
+    {
+      "key": "vol_user_id",
+      "value": "",
+      "type": "string",
+      "description": "User ID of Volunteer (from login response)."
+    }
+  ]
+}

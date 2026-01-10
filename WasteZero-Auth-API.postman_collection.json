@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "WasteZero Auth API",
+    "name": "WasteZero Auth API Milestone 1",
     "description": "Collection for testing WasteZero backend authentication endpoints",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },

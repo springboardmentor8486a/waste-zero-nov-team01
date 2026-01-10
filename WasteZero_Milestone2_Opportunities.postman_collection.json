@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "WasteZero Opportunities API (Milestone 2)",
+    "description": "Collection for testing WasteZero backend opportunity CRUD APIs with role & ownership enforcement",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Opportunity (NGO Only)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Community Park Cleanup\",\n  \"description\": \"Help us clean and restore the local park.\",\n  \"required_skills\": [\"Cleaning\", \"Teamwork\"],\n  \"duration\": \"2 hours\",\n  \"location\": \"Kolkata\",\n  \"status\": \"open\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/opportunities",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "opportunities"]
+        },
+        "description": "Create a new opportunity. Only NGO role is allowed."
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Opportunities",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/opportunities",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "opportunities"]
+        },
+        "description": "Get list of all opportunities. Public access."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Single Opportunity by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/opportunities/{{opportunityId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "opportunities", "{{opportunityId}}"]
+        },
+        "description": "Get a single opportunity by ID."
+      },
+      "response": []
+    },
+    {
+      "name": "Update Opportunity (Owner NGO Only)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"closed\",\n  \"duration\": \"3 hours\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/opportunities/{{opportunityId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "opportunities", "{{opportunityId}}"]
+        },
+        "description": "Update an existing opportunity. Only the owner NGO can update."
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Opportunity (Owner NGO Only)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/opportunities/{{opportunityId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "opportunities", "{{opportunityId}}"]
+        },
+        "description": "Delete an opportunity. Only the owner NGO can delete."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Opportunities with Filters",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/opportunities?location=Kolkata&status=open&skills=Cleaning",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "opportunities"],
+          "query": [
+            { "key": "location", "value": "Kolkata" },
+            { "key": "status", "value": "open" },
+            { "key": "skills", "value": "Cleaning" }
+          ]
+        },
+        "description": "Get opportunities with optional filters: location, status, skills."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token of logged-in NGO user. Paste token here."
+    },
+    {
+      "key": "opportunityId",
+      "value": "",
+      "type": "string",
+      "description": "ID of opportunity created. Paste the _id from create response here."
+    }
+  ]
+}
