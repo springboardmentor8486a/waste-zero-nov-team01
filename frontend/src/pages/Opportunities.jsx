@@ -12,6 +12,14 @@ function Opportunities() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Filter state: 'all' | 'mine' (NGO can toggle)
+  const [filter, setFilter] = useState('all');
+
+  // Default NGOs to see their own opportunities on first load
+  useEffect(() => {
+    if (user?.role === 'ngo') setFilter('mine');
+  }, [user?.role]);
+
   useEffect(() => {
     const fetchOpportunities = async () => {
       try {
@@ -38,6 +46,18 @@ function Opportunities() {
   // Volunteer ki create/delete access ledu
   const isNGO = user?.role === "ngo";
   const pageTitle = isNGO ? "Opportunities" : "Volunteer Opportunities";
+
+  // Memoized filtered list according to selected filter
+  const filteredOpportunities = React.useMemo(() => {
+    if (filter === 'mine' && isNGO) {
+      const currentId = user?._id || user?.id;
+      return opportunities.filter(o => {
+        const owner = o.ngo_id?._id || o.ngo_id?.id || o.ngo_id;
+        return String(owner) === String(currentId);
+      });
+    }
+    return opportunities;
+  }, [opportunities, filter, isNGO, user]);
 
   const handleLocalDelete = (id) => {
     setOpportunities((prev) => prev.filter((o) => o._id !== id));
@@ -107,6 +127,30 @@ function Opportunities() {
               : "Find opportunities that match your skills"
             }
           </p>
+
+          {isNGO && (
+            <div className="mt-3 flex items-center gap-3">
+              <label className="text-xs text-gray-500">Show:</label>
+              <div className="inline-flex rounded-lg bg-white border shadow-sm">
+                <button
+                  onClick={() => setFilter('all')}
+                  className={`px-3 py-1 text-sm ${filter === 'all' ? 'bg-emerald-600 text-white rounded-lg' : 'text-gray-700'}`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setFilter('mine')}
+                  className={`px-3 py-1 text-sm ${filter === 'mine' ? 'bg-emerald-600 text-white rounded-lg' : 'text-gray-700'}`}
+                >
+                  My Opportunities
+                </button>
+              </div>
+              <span className="text-xs text-gray-400">{filter === 'mine' ? `${opportunities.filter(o => {
+                const owner = o.ngo_id?._id || o.ngo_id?.id || o.ngo_id;
+                return String(owner) === String(user?._id || user?.id || user?.id);
+              }).length} results` : `${opportunities.length} results`}</span>
+            </div>
+          )}
         </div>
 
         {isNGO && (
@@ -122,7 +166,7 @@ function Opportunities() {
 
       {/* Opportunities Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {opportunities.map((opp) => {
+        {filteredOpportunities.map((opp) => {
           const skills = opp.required_skills || opp.requiredSkills || opp.skills || [];
           
           return (
@@ -216,12 +260,12 @@ function Opportunities() {
           })}
       </div>
 
-      {opportunities.length === 0 && !loading && (
+      {filteredOpportunities.length === 0 && !loading && (
         <div className="text-center py-16">
           <div className="text-gray-400 text-4xl mb-4">📋</div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             {isNGO 
-              ? "No opportunities created yet" 
+              ? (filter === 'mine' ? "You haven't created any opportunities yet" : "No opportunities created yet")
               : "No opportunities available"
             }
           </h3>
