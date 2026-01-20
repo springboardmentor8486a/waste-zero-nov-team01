@@ -61,18 +61,21 @@ function Profile() {
   const labelStyle = {
     display: "block",
     marginBottom: "4px",
-    color: "#111111",
+    color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#111111",
     fontWeight: "600",
     fontSize: "13px",
   };
 
   const inputStyle = {
     width: "100%",
-    padding: "8px 10px",
-    border: "1px solid #e5e7eb",
-    borderRadius: "2px",
+    padding: "10px 12px",
+    border: document.documentElement.classList.contains('dark') ? "1px solid #475569" : "1px solid #e5e7eb",
+    borderRadius: "8px",
     outline: "none",
-    fontSize: "13px",
+    fontSize: "14px",
+    backgroundColor: document.documentElement.classList.contains('dark') ? "#0f172a" : "#ffffff",
+    color: document.documentElement.classList.contains('dark') ? "#e2e8f0" : "#111111",
+    transition: "all 0.2s",
   };
 
   // generic change handler
@@ -129,14 +132,16 @@ function Profile() {
   return (
     <div
       style={{
-        padding: "16px 40px",
+        padding: "24px 40px",
         maxWidth: "720px",
         margin: "0 auto",
+        minHeight: "100vh",
+        backgroundColor: document.documentElement.classList.contains('dark') ? "transparent" : "transparent",
       }}
     >
       {/* Loading state */}
       {loading && (
-        <div style={{ padding: "20px", textAlign: "center", color: "#6b7280" }}>
+        <div style={{ padding: "20px", textAlign: "center", color: document.documentElement.classList.contains('dark') ? "#94a3b8" : "#6b7280" }}>
           Loading your profile...
         </div>
       )}
@@ -146,9 +151,13 @@ function Profile() {
           {/* My Profile heading */}
           <h2
             style={{
-              fontSize: "20px",
-              fontWeight: "700",
-              marginBottom: "4px",
+              fontSize: "28px",
+              fontWeight: "800",
+              marginBottom: "8px",
+              background: document.documentElement.classList.contains('dark') ? "linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)" : "linear-gradient(135deg, #424141 0%, #374151 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
             }}
           >
             My Profile
@@ -160,35 +169,48 @@ function Profile() {
               display: "flex",
               gap: "12px",
               fontSize: "13px",
-              marginBottom: "16px",
+              marginBottom: "24px",
+              color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#687179",
+              borderBottom: document.documentElement.classList.contains('dark') ? "1px solid #475569" : "1px solid #e5e7eb",
+              paddingBottom: "12px",
             }}
           >
-            <span style={{ fontWeight: "700" }}>Profile</span>
-            <span style={{ color: "#6b7280", cursor: "pointer" }}>Password</span>
+            <span style={{ fontWeight: "700", paddingBottom: "8px", borderBottom: "2px solid #10b981" }}>Profile</span>
+            <span style={{ color: document.documentElement.classList.contains('dark') ? "#64748b" : "#9ca3af", cursor: "pointer", transition: "all 0.2s" }}></span>
           </div>
 
           {/* Personal Information block */}
-          <h3
+          <div
             style={{
-              fontSize: "15px",
-              fontWeight: "700",
-              marginBottom: "4px",
+              backgroundColor: document.documentElement.classList.contains('dark') ? "#2a384e" : "#ffffff",
+              border: document.documentElement.classList.contains('dark') ? "1px solid #334155" : "1px solid #e5e7eb",
+              borderRadius: "12px",
+              padding: "24px",
+              boxShadow: document.documentElement.classList.contains('dark') ? "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.06)" : "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
             }}
           >
-            Personal Information
-          </h3>
-          <p
-            style={{
-              fontSize: "12px",
-              color: "#6b7280",
-              marginBottom: "16px",
-            }}
-          >
-            Update your personal information and profile details
-          </p>
+            <h3
+              style={{
+                fontSize: "18px",
+                fontWeight: "700",
+                marginBottom: "8px",
+                color: document.documentElement.classList.contains('dark') ? "#e2e8f0" : "#111111",
+              }}
+            >
+              Personal Information
+            </h3>
+            <p
+              style={{
+                fontSize: "13px",
+                color: document.documentElement.classList.contains('dark') ? "#94a3b8" : "#424244",
+                marginBottom: "20px",
+              }}
+            >
+              Update your personal information and profile details
+            </p>
 
-          {/* Form: full name, email, location, skills, bio, buttons */}
-          <div style={{ maxWidth: "520px" }}>
+            {/* Form: full name, email, location, skills, bio, buttons */}
+            <div style={{ maxWidth: "520px" }}>
             <div style={{ marginBottom: "14px" }}>
               <label style={labelStyle}>Full Name</label>
               <input
@@ -207,15 +229,15 @@ function Profile() {
                 name="email"
                 style={{
                   ...inputStyle,
-                  backgroundColor: "#f9fafb",
-                  color: "#6b7280",
+                  backgroundColor: document.documentElement.classList.contains('dark') ? "#0f172a" : "#f9fafb",
+                  color: document.documentElement.classList.contains('dark') ? "#64748b" : "#6b7280",
                   cursor: "not-allowed",
                 }}
                 value={form.email}
                 disabled
                 title="Registered email cannot be changed"
               />
-              <p style={{ fontSize: "11px", color: "#9ca3af", marginTop: "4px" }}>
+              <p style={{ fontSize: "11px", color: document.documentElement.classList.contains('dark') ? "#64748b" : "#000000", marginTop: "4px" }}>
                 Your registered email cannot be changed
               </p>
             </div>
@@ -254,69 +276,73 @@ function Profile() {
               />
             </div>
 
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "20px" }}>
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={updating}
                 style={{
-                  padding: "10px 24px",
-                  backgroundColor: updating ? "#9ca3af" : "#10b981",
+                  padding: "12px 28px",
+                  background: updating ? "#9ca3af" : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                   color: "#ffffff",
-                  borderRadius: "6px",
+                  borderRadius: "8px",
                   border: "none",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: updating ? "not-allowed" : "pointer",
-                  transition: "all 0.2s ease",
+                  transition: "all 0.3s ease",
                   opacity: updating ? 0.7 : 1,
+                  boxShadow: updating ? "none" : "0 4px 12px rgba(16, 185, 129, 0.3)",
                 }}
-                onMouseOver={(e) => !updating && (e.target.style.backgroundColor = "#059669")}
-                onMouseOut={(e) => !updating && (e.target.style.backgroundColor = "#10b981")}
+                onMouseOver={(e) => !updating && (e.target.style.boxShadow = "0 6px 16px rgba(16, 185, 129, 0.4)", e.target.style.transform = "translateY(-2px)")}
+                onMouseOut={(e) => !updating && (e.target.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.3)", e.target.style.transform = "translateY(0)")}
               >
-                {updating ? "Updating..." : "Update Profile"}
+                {updating ? "Updating..." : "✓ Update Profile"}
               </button>
 
               <button
                 type="button"
                 onClick={() => navigate("/change-password")}
                 style={{
-                  padding: "10px 24px",
-                  backgroundColor: "#e5e7eb",
-                  color: "#111827",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
+                  padding: "12px 28px",
+                  backgroundColor: document.documentElement.classList.contains('dark') ? "#334155" : "#e5e7eb",
+                  color: document.documentElement.classList.contains('dark') ? "#e2e8f0" : "#111827",
+                  borderRadius: "8px",
+                  border: document.documentElement.classList.contains('dark') ? "1px solid #475569" : "1px solid #d1d5db",
                   fontSize: "14px",
                   fontWeight: "600",
                   cursor: "pointer",
-                  transition: "all 0.2s ease",
+                  transition: "all 0.3s ease",
                 }}
-                onMouseOver={(e) => (e.target.style.backgroundColor = "#d1d5db")}
-                onMouseOut={(e) => (e.target.style.backgroundColor = "#e5e7eb")}
+                onMouseOver={(e) => (e.target.style.backgroundColor = document.documentElement.classList.contains('dark') ? "#475569" : "#d1d5db", e.target.style.transform = "translateY(-2px)")}
+                onMouseOut={(e) => (e.target.style.backgroundColor = document.documentElement.classList.contains('dark') ? "#334155" : "#e5e7eb", e.target.style.transform = "translateY(0)")}
               >
-                Change Password
+                🔒 Change Password
               </button>
             </div>
 
             {successMessage && (
               <div
                 style={{
-                  marginTop: "12px",
-                  padding: "12px 16px",
-                  backgroundColor: "#d1fae5",
-                  color: "#065f46",
-                  borderRadius: "6px",
-                  fontSize: "13px",
+                  marginTop: "16px",
+                  padding: "14px 16px",
+                  backgroundColor: document.documentElement.classList.contains('dark') ? "#064e3b" : "#d1fae5",
+                  color: document.documentElement.classList.contains('dark') ? "#86efac" : "#065f46",
+                  borderRadius: "8px",
+                  fontSize: "14px",
                   fontWeight: "500",
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
+                  border: document.documentElement.classList.contains('dark') ? "1px solid #10b981" : "1px solid #86efac",
+                  boxShadow: document.documentElement.classList.contains('dark') ? "0 4px 6px rgba(16, 185, 129, 0.2)" : "none",
                 }}
               >
-                <span>✓</span>
+                <span style={{ fontSize: "16px" }}>✓</span>
                 {successMessage}
               </div>
             )}
+            </div>
           </div>
         </>
       )}

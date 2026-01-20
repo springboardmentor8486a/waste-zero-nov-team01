@@ -36,7 +36,7 @@ function Register() {
         email: form.email,
         password: form.password,
         // backend usually expects lowercase role
-        role: form.role.toLowerCase(), // "ngo" | "volunteer"
+        role: form.role.toLowerCase(), 
         skills: form.skills
           ? form.skills.split(",").map((s) => s.trim())
           : [],
@@ -47,11 +47,8 @@ function Register() {
       await register(payload);
 
       // Redirect based on role
-      if (payload.role === "volunteer") {
-        navigate("/volunteer-dashboard"); // ✅ matches App.jsx
-      } else {
-        navigate("/dashboard"); // NGO -> main dashboard
-      }
+       if (payload.role === "volunteer") navigate("/volunteer-dashboard");
+      else navigate("/dashboard"); // NGO
     } catch (err) {
       setError(
         err?.response?.data?.message ||
@@ -61,9 +58,8 @@ function Register() {
       setLoading(false);
     }
   };
-
   return (
-    <div className="login-page min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
+    <div className="login-page min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
       <GlassCard>
         {/* Logo + titles block */}
         <div
@@ -90,7 +86,7 @@ function Register() {
             style={{
               fontSize: 22,
               fontWeight: 700,
-              color: "#100a0a",
+              color: document.documentElement.classList.contains('dark') ? "#e2e8f0" : "#100a0a",
               marginBottom: 2,
             }}
           >
@@ -102,7 +98,7 @@ function Register() {
             style={{
               fontSize: 18,
               fontWeight: 600,
-              color: "#100a0a",
+              color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#100a0a",
             }}
           >
             Create Account
@@ -113,7 +109,7 @@ function Register() {
           style={{
             textAlign: "center",
             fontSize: 12,
-            color: "#6b7280",
+            color: document.documentElement.classList.contains('dark') ? "#94a3b8" : "#6b7280",
             marginBottom: 14,
           }}
         >
@@ -124,11 +120,12 @@ function Register() {
           <div
             style={{
               marginBottom: 10,
-              padding: "6px 10px",
+              padding: "8px 12px",
               fontSize: 12,
-              borderRadius: 6,
-              background: "#fee2e2",
-              color: "#b91c1c",
+              borderRadius: 8,
+              background: document.documentElement.classList.contains('dark') ? "#7f1d1d" : "#fee2e2",
+              color: document.documentElement.classList.contains('dark') ? "#fca5a5" : "#b91c1c",
+              border: `1px solid ${document.documentElement.classList.contains('dark') ? "#991b1b" : "#fecaca"}`,
             }}
           >
             {error}
@@ -137,20 +134,20 @@ function Register() {
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#374151", fontWeight: 500 }}>
               Name
             </label>
             <input
               name="name"
               value={form.name}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-xs px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 text-xs px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
           </div>
 
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#374151", fontWeight: 500 }}>
               Email
             </label>
             <input
@@ -158,13 +155,13 @@ function Register() {
               name="email"
               value={form.email}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
           </div>
 
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#374151", fontWeight: 500 }}>
               Password
             </label>
             <input
@@ -172,20 +169,20 @@ function Register() {
               name="password"
               value={form.password}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
           </div>
 
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#374151", fontWeight: 500 }}>
               Role
             </label>
             <select
               name="role"
               value={form.role}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               <option value="NGO">NGO</option>
               <option value="VOLUNTEER">Volunteer</option>
@@ -193,7 +190,7 @@ function Register() {
           </div>
 
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#374151", fontWeight: 500 }}>
               Skills (comma separated)
             </label>
             <input
@@ -201,24 +198,24 @@ function Register() {
               value={form.skills}
               onChange={handleChange}
               placeholder="Cleaning, Teaching, Fundraising"
-              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
           <div style={{ marginBottom: 8 }}>
-            <label style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#374151", fontWeight: 500 }}>
               Location
             </label>
             <input
               name="location"
               value={form.location}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
           <div style={{ marginBottom: 10 }}>
-            <label style={{ display: "block", fontSize: 13, marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 13, marginBottom: 4, color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#374151", fontWeight: 500 }}>
               Bio
             </label>
             <textarea
@@ -226,17 +223,17 @@ function Register() {
               value={form.bio}
               onChange={handleChange}
               rows={3}
-              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 text-sm px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2.5 rounded-full border-0 text-white text-sm font-semibold ${
+            className={`w-full py-2.5 rounded-full border-0 text-white text-sm font-semibold transition-all duration-200 ${
               loading
-                ? "bg-green-300 cursor-default"
-                : "bg-green-600 hover:bg-green-700 cursor-pointer"
+                ? "bg-green-300 dark:bg-slate-500 cursor-default opacity-70"
+                : "bg-gradient-to-r from-green-600 to-emerald-500 dark:from-green-600 dark:to-emerald-500 hover:shadow-lg hover:shadow-green-500/50 dark:hover:shadow-green-600/40 cursor-pointer"
             }`}
           >
             {loading ? "Registering..." : "Register"}
@@ -248,7 +245,7 @@ function Register() {
             marginTop: 10,
             fontSize: 12,
             textAlign: "center",
-            color: "#4b5563",
+            color: document.documentElement.classList.contains('dark') ? "#94a3b8" : "#4b5563",
           }}
         >
           Already have an account?{" "}

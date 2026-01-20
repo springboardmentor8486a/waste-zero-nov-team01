@@ -1,5 +1,5 @@
 const Opportunity = require("../models/Opportunity");
-const User = require("../models/User");
+const User = require("../models/user");
 
 // helper: skill overlap count
 const overlapScore = (a = [], b = []) => {

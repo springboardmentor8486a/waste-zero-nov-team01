@@ -57,6 +57,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Wishlist of opportunity ids user is interested in
+    wishlist: [
+      { type: mongoose.Schema.Types.ObjectId, ref: 'Opportunity' }
+    ],
   },
   {
     timestamps: true, // automatically adds createdAt and updatedAt

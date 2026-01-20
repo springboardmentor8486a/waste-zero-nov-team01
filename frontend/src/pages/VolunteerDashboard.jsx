@@ -1,147 +1,419 @@
 import React, { useState, useEffect } from 'react';
-
+import VolunteerApi from '../hooks/useVolunteerApi';
+import DashboardHeader from '../components/DashboardHeader';
+import StatsGrid from '../components/StatsGrid';
+import OpportunitiesPanel from '../components/OpportunitiesPanel';
+import RecentActivities from '../components/RecentActivities';
 
 const VolunteerDashboard = () => {
-  const [userName, setUserName] = useState('John'); // Default
+  const [userName, setUserName] = useState('Volunteer');
+  const [toast, setToast] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
+
+  // Stats — default to zeros; will be populated from backend
   const [stats, setStats] = useState({
-    pickups: 635,
-    recycled: 243,
-    co2: 67,
-    hours: 124.5
+    opportunitiesJoined: 0,
+    daysActive: 0,
+    connections: 0,
+    availableOpportunities: 0
   });
 
+  // Upcoming pickups (loaded from backend)
   const [upcomingPickups, setUpcomingPickups] = useState([]);
-  const [recyclingData, setRecyclingData] = useState([
-    { name: 'Plastic', percent: 40, color: '#FF6B6B' },
-    { name: 'Paper', percent: 25, color: '#4ECDC4' },
-    { name: 'Glass', percent: 20, color: '#45B7D1' },
-    { name: 'E-Waste', percent: 10, color: '#96CEB4' },
-    { name: 'Organic', percent: 5, color: '#FFEAA7' }
-  ]);
 
-  // Login user name fetch
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [queuedCount, setQueuedCount] = useState(VolunteerApi.getQueuedCount());
+
+  // Nearby opportunities (loaded from backend)
+  const [opportunities, setOpportunities] = useState([]);
+  const [joinedOpportunities, setJoinedOpportunities] = useState([]);
+  const [joinedDetails, setJoinedDetails] = useState([]);
+
+  const WISHLIST_KEY = 'volunteer_wishlist_v1';
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      const raw = localStorage.getItem(WISHLIST_KEY) || '[]';
+      return JSON.parse(raw);
+    } catch (e) {
+      return [];
+    }
+  });
+
+  // helper: format date to dd.mm.yyyy and datetime to dd.mm.yyyy HH:MM
+  const formatDate = (input) => {
+    const d = new Date(input);
+    if (Number.isNaN(d.getTime())) return input;
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}.${mm}.${yyyy}`;
+  };
+
+  const formatDateTime = (input) => {
+    const d = new Date(input);
+    if (Number.isNaN(d.getTime())) return input;
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    return `${dd}.${mm}.${yyyy} ${hh}:${min}`;
+  };
+
+  const [loadingPickups, setLoadingPickups] = useState(true);
+  const [loadingOpportunities, setLoadingOpportunities] = useState(true);
+
+  // Centralized dashboard fetch so we can refresh on-demand
+  const fetchDashboardData = async () => {
+    let mounted = true; // local flag for this call
+    try {
+      setLoadingPickups(true);
+      setLoadingOpportunities(true);
+
+      const [wishlistData, dashboardData, joined, conversations, userProfile] = await Promise.all([
+        VolunteerApi.getWishlist(), 
+        VolunteerApi.getDashboardSummary(), 
+        VolunteerApi.getMyJoined(),
+        VolunteerApi.getMyConversations(),
+        VolunteerApi.getMyProfile()
+      ]);
+      setFetchError(null);
+
+      if (Array.isArray(wishlistData)) {
+        const ids = wishlistData.map(i => i._id || i.id || i);
+        setWishlist(ids);
+      }
+
+      if (Array.isArray(joined)) {
+        setJoinedOpportunities(joined.map(o => o._id || o.id));
+        setJoinedDetails(joined);
+      }
+
+      if (dashboardData) {
+        const { stats: s, upcoming, opportunities: opps } = dashboardData;
+        
+        // Calculate days active from user profile createdAt
+        let daysActive = 0;
+        if (userProfile && userProfile.createdAt) {
+          const registrationDate = new Date(userProfile.createdAt);
+          const today = new Date();
+          daysActive = Math.floor((today - registrationDate) / (1000 * 60 * 60 * 24)) + 1;
+        }
+        
+        // Count unique connections from conversations
+        const connectionsCount = Array.isArray(conversations) ? conversations.length : 0;
+        
+        const opportunitiesJoined = (joined && joined.length) || 0;
+        const availableOpportunities = (opps && opps.length) || 0;
+        
+        setStats(prev => ({ 
+          ...prev, 
+          opportunitiesJoined: opportunitiesJoined,
+          daysActive: daysActive,
+          connections: connectionsCount,
+          availableOpportunities: availableOpportunities
+        }));
+        setUpcomingPickups(upcoming?.map(p => ({ id: p._id, dateISO: p.dateTime, dateTime: formatDateTime(p.dateTime), address: p.address, status: p.status, lat: p.lat, lng: p.lng })) || []);
+        setOpportunities(opps?.map(o => ({ id: o._id, title: o.title, org: (o.ngo_id && o.ngo_id.name) ? (o.ngo_id.name) : (o.location || 'Local NGO'), date: formatDate(o.date), seats: o.seats || 10, peopleJoined: o.peopleJoined || 0, color: 'from-emerald-400 to-emerald-600' })) || []);
+        setLoadingPickups(false);
+        setLoadingOpportunities(false);
+        return;
+      }
+
+      // fallback
+      setFetchError('Unable to fetch dashboard summary from server. Attempting individual endpoints.');
+      console.warn('VolunteerDashboard: dashboardData empty — check backend /api/pickups/dashboard/summary');
+
+      const [myPickups, opps] = await Promise.all([VolunteerApi.getMyPickups(), VolunteerApi.getOpportunities()]);
+      
+      // Calculate days active from user profile
+      let daysActive = 0;
+      if (userProfile && userProfile.createdAt) {
+        const registrationDate = new Date(userProfile.createdAt);
+        const today = new Date();
+        daysActive = Math.floor((today - registrationDate) / (1000 * 60 * 60 * 24)) + 1;
+      }
+      
+      // Count unique connections from conversations
+      const connectionsCount = Array.isArray(conversations) ? conversations.length : 0;
+      
+      const opportunitiesJoined = (joined && joined.length) || 0;
+      const availableOpportunities = (opps && opps.length) || 0;
+      
+      setStats(prev => ({ 
+        ...prev,
+        opportunitiesJoined: opportunitiesJoined,
+        daysActive: daysActive,
+        connections: connectionsCount,
+        availableOpportunities: availableOpportunities
+      }));
+      
+      setUpcomingPickups(myPickups.map(p => ({ id: p._id || p.id, dateISO: p.dateTime || p.date, dateTime: formatDateTime(p.dateTime || p.date), address: p.address || p.location || 'Unknown', status: p.status || 'Scheduled', lat: p.lat, lng: p.lng })));
+      setOpportunities(opps.map(o => ({ id: o._id || o.id, title: o.title, org: (o.ngo_id && o.ngo_id.name) ? o.ngo_id.name : (o.location || 'Local NGO'), date: formatDate(o.date || o.dateTime), seats: o.seats || 10, peopleJoined: o.peopleJoined || 0, color: 'from-emerald-400 to-emerald-600' })));
+      setLoadingPickups(false);
+      setLoadingOpportunities(false);
+    } catch (e) {
+      setFetchError('Error fetching dashboard: ' + (e?.response?.statusText || e.message));
+      console.error('Error fetching dashboard or wishlist:', e);
+      setLoadingPickups(false);
+      setLoadingOpportunities(false);
+    }
+  };
+
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('userName') || 
-                        sessionStorage.getItem('userName') ||
-                        'Volunteer'; // Fallback
+    const loggedInUser = localStorage.getItem('userName') || sessionStorage.getItem('userName') || 'Volunteer';
     setUserName(loggedInUser);
-    
-    // Mock API - real backend calls add cheyyandi
-    setUpcomingPickups([]);
+
+    fetchDashboardData();
   }, []);
 
+  useEffect(() => {
+    // persist wishlist
+    localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
+  }, [wishlist]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setToast('Back online — syncing queued actions');
+      VolunteerApi.processQueue((id) => {
+        setToast(`Synced pickup ${id}`);
+        setTimeout(() => setToast(null), 1500);
+      }).then(remaining => {
+        setQueuedCount(remaining);
+        // refresh dashboard from server when sync completes
+        fetchDashboardData();
+
+        setTimeout(() => setToast(null), 1000);
+      });
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setToast('You are offline — actions will be queued');
+      setTimeout(() => setToast(null), 1500);
+    };
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const toggleWishlist = async (op) => {
+    // try server-side wishlist first
+    try {
+      if (!wishlist.includes(op.id)) {
+        const res = await VolunteerApi.addToWishlistApi(op.id);
+        if (res) {
+          setWishlist(prev => {
+            const next = [...prev, op.id];
+            setToast('Added to wishlist');
+            setTimeout(() => setToast(null), 1500);
+            return next;
+          });
+          return;
+        }
+      } else {
+        const res = await VolunteerApi.removeFromWishlistApi(op.id);
+        if (res) {
+          setWishlist(prev => prev.filter(id => id !== op.id));
+          setToast('Removed from wishlist');
+          setTimeout(() => setToast(null), 1500);
+          return;
+        }
+      }
+    } catch (e) {
+      // Save locally if server is unreachable; will sync when online
+      setWishlist(prev => {
+        const exists = prev.includes(op.id);
+        const next = exists ? prev.filter(id => id !== op.id) : [...prev, op.id];
+        setToast(exists ? 'Removed from wishlist (saved locally)' : 'Added to wishlist (saved locally)');
+        setTimeout(() => setToast(null), 2000);
+        return next;
+      });
+    }
+  };
+
+
+  const joinOpportunity = async (op) => {
+    if (joinedOpportunities.includes(op.id)) {
+      setToast('You have already joined this opportunity');
+      setTimeout(() => setToast(null), 1500);
+      return;
+    }
+
+    try {
+      // optimistic UI: mark as joined
+      setJoinedOpportunities(prev => [...prev, op.id]);
+      setOpportunities(prev => prev.map(item => item.id === op.id ? { ...item, peopleJoined: (item.peopleJoined || 0) + 1 } : item));
+
+      await VolunteerApi.joinOpportunityApi(op.id);
+      setToast('Joined opportunity — success');
+      setTimeout(() => setToast(null), 1500);
+    } catch (e) {
+      // revert optimistic update on failure
+      setJoinedOpportunities(prev => prev.filter(id => id !== op.id));
+      setOpportunities(prev => prev.map(item => item.id === op.id ? { ...item, peopleJoined: Math.max(0, (item.peopleJoined || 1) - 1) } : item));
+
+      const msg = e?.response?.data?.message || e?.message || 'Failed to join opportunity';
+      setToast(msg);
+      setTimeout(() => setToast(null), 2500);
+    }
+  };
+
+  const leaveOpportunity = async (op) => {
+    if (!joinedOpportunities.includes(op.id)) {
+      setToast('You have not joined this opportunity');
+      setTimeout(() => setToast(null), 1500);
+      return;
+    }
+
+    try {
+      // optimistic UI: remove joined
+      setJoinedOpportunities(prev => prev.filter(id => id !== op.id));
+      setOpportunities(prev => prev.map(item => item.id === op.id ? { ...item, peopleJoined: Math.max(0, (item.peopleJoined || 1) - 1) } : item));
+
+      await VolunteerApi.leaveOpportunityApi(op.id);
+      setToast('Left opportunity');
+      setTimeout(() => setToast(null), 1500);
+    } catch (e) {
+      // revert optimistic removal on failure
+      setJoinedOpportunities(prev => [...prev, op.id]);
+      setOpportunities(prev => prev.map(item => item.id === op.id ? { ...item, peopleJoined: (item.peopleJoined || 0) + 1 } : item));
+
+      const msg = e?.response?.data?.message || e?.message || 'Failed to leave opportunity';
+      setToast(msg);
+      setTimeout(() => setToast(null), 2500);
+    }
+  };
+
+  const completePickup = async (id) => {
+    // Optimistic UI: remove from list
+    setUpcomingPickups(prev => prev.filter(p => p.id !== id));
+    setStats(s => ({ ...s, todayPickups: Math.max(0, s.todayPickups - 1), weekPickups: Math.max(0, s.weekPickups - 1) }));
+
+    if (!navigator.onLine) {
+      // enqueue
+      VolunteerApi.enqueuePickupComplete(id);
+      setQueuedCount(VolunteerApi.getQueuedCount());
+      setToast('Offline — completion queued and will sync when online');
+      setTimeout(() => setToast(null), 2000);
+      return;
+    }
+
+    try {
+      await VolunteerApi.completePickup(id);
+      setToast('Pickup completed — synced');
+      setTimeout(() => setToast(null), 1500);
+    } catch (e) {
+      // on failure, enqueue
+      VolunteerApi.enqueuePickupComplete(id);
+      setQueuedCount(VolunteerApi.getQueuedCount());
+      setToast('Network issue — queued and will retry');
+      setTimeout(() => setToast(null), 2000);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-      {/* Header - Dynamic username */}
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Volunteer Dashboard</h1>
-        <div className="text-sm text-gray-500">
-          Welcome back, <span className="font-semibold text-gray-800 capitalize">{userName}</span>! Your waste management view
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 p-6 md:p-10">
+      <DashboardHeader userName={userName} wishlistCount={wishlist.length} onRefresh={() => fetchDashboardData()} />
 
-      {/* Stats Cards - Exact same */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Pickups" value={stats.pickups} change={-28} color="bg-blue-500" />
-        <StatCard title="Recycled Items" value={stats.recycled} change={12} color="bg-green-500" />
-        <StatCard title="CO2 Saved (kg)" value={stats.co2} change={17} color="bg-purple-500" />
-        <StatCard title="Volunteer Hours" value={stats.hours} change={14} color="bg-orange-500" />
-      </div>
-
-      {/* Main Content - Same */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-            <svg className="w-7 h-7 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Upcoming Pickups
-          </h2>
-          <div className="overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {upcomingPickups.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
-                      No upcoming pickups scheduled.
-                    </td>
-                  </tr>
-                ) : (
-                  upcomingPickups.map((pickup, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pickup.dateTime}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pickup.address}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">{pickup.status}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-blue-600 hover:text-blue-900">View</button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
-            <svg className="w-7 h-7 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-            </svg>
-            Recycling Breakdown
-          </h2>
-          
-          <div className="space-y-4 mb-8">
-            {recyclingData.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">{item.name}</span>
-                <div className="w-20 flex items-center">
-                  <div className="w-full bg-gray-200 rounded-full h-2 mr-3">
-                    <div className="h-2 rounded-full transition-all duration-300" style={{ width: `${item.percent}%`, backgroundColor: item.color }} />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900">{item.percent}%</span>
-                </div>
+      {/* Fetch error banner */}
+      {fetchError && (
+        <div className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 text-rose-700 dark:text-rose-300">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="font-semibold mb-1">Dashboard sync issue</div>
+              <div className="text-sm">{fetchError}</div>
+            </div>
+            <div className="text-right text-xs">
+              <div className="mb-2">Possible fixes:</div>
+              <div className="space-y-1">
+                <div>- Ensure backend is running and reachable at <code>http://localhost:5000</code></div>
+                <div>- Restart backend dev server (e.g., stop and run <code>npm run dev</code>)</div>
+                <div>- Check auth token (stored in <code>localStorage.wastezero_token</code>)</div>
               </div>
-            ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <StatsGrid stats={stats} hideThisWeek={true} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left: Recent Activity + Nearby + Wishlist stacked */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 space-y-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Recent Activity</h2>
+            <div className="text-sm text-slate-500 dark:text-slate-400">Latest actions from your account</div>
           </div>
 
-          <div className="text-center pt-6 border-t border-gray-100">
-            <div className="text-2xl font-bold text-gray-900 mb-1">124.5 kg</div>
-            <div className="text-sm text-gray-500">Total Collected</div>
-            <div className="text-xs text-green-600 font-medium mt-1">+14% from last month</div>
+          <RecentActivities activities={(function(){
+            const items = [];
+            // pickups
+            upcomingPickups.slice().reverse().slice(0,5).forEach(p => items.push({ type:'pickup', title: 'Pickup scheduled', subtitle: p.address, timestamp: p.dateISO || null }));
+            // joined opportunities
+            (joinedDetails || []).slice().reverse().slice(0,5).forEach(o => {
+              const joinedAt = (o.participants && o.participants.length) ? (o.participants.find(p => p.joinedAt)?.joinedAt || o.createdAt) : o.createdAt || null;
+              items.push({ type: 'opportunity', title: `Joined ${o.title}`, subtitle: o.ngo_id?.name || o.org || 'Local NGO', timestamp: joinedAt });
+            });
+            return items.slice(0,5);
+          })()} loading={loadingPickups || loadingOpportunities} />
+
+          {/* Nearby opportunities stacked under Recent Activity */}
+          <OpportunitiesPanel layout="stack" loading={loadingOpportunities} opportunities={opportunities} wishlist={wishlist} toggleWishlist={toggleWishlist} joinOpportunity={joinOpportunity} leaveOpportunity={leaveOpportunity} joined={joinedOpportunities} />
+        </div>
+
+        {/* Right: Wishlist */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Wishlist</h3>
+            <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-1 rounded-full">{wishlist.length}</div>
+          </div>
+
+          <div className="space-y-2 max-h-[600px] overflow-y-auto">
+            {wishlist.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-2">💚</div>
+                <div className="text-sm text-slate-500 dark:text-slate-400 font-medium">No opportunities saved yet</div>
+              </div>
+            ) : (
+              opportunities
+                .filter(op => wishlist.includes(op.id))
+                .map(op => (
+                  <div key={op.id} className="p-3 border border-slate-200 dark:border-slate-700 rounded-lg hover:shadow-md dark:hover:shadow-slate-900 transition-shadow cursor-pointer bg-slate-50 dark:bg-slate-700">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate">{op.title}</div>
+                        <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">{op.org}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{op.date}</div>
+                      </div>
+                      <button
+                        onClick={() => toggleWishlist(op)}
+                        className="text-lg hover:scale-110 transition-transform shrink-0"
+                        title="Remove from wishlist"
+                      >
+                        ❤️
+                      </button>
+                    </div>
+                  </div>
+                ))
+            )}
           </div>
         </div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-2 rounded-md shadow-lg animate-fade-in">
+          {toast}
+        </div>
+      )}
     </div>
   );
 };
 
-const StatCard = ({ title, value, change, color }) => {
-  const isPositive = change >= 0;
-  return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-sm font-medium text-gray-500">{title}</div>
-      </div>
-      <div className="text-3xl font-bold text-gray-900 mb-2">{value}</div>
-      <div className={`text-sm ${isPositive ? 'text-green-600' : 'text-red-600'} flex items-center`}>
-        <span className={`w-3 h-3 ${isPositive ? 'text-green-500' : 'text-red-500'} mr-1`}>
-          {isPositive ? '↗' : '↘'}
-        </span>
-        <span>{Math.abs(change)}% from last month</span>
-      </div>
-    </div>
-  );
-};
+
 
 export default VolunteerDashboard;

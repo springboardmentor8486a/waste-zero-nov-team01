@@ -152,18 +152,18 @@ const Matches = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 py-6 bg-white dark:bg-slate-900 min-h-screen">
       {/* Header Section */}
       <div className="mb-8">
         {user?.role === 'ngo' ? (
           <>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Matched Volunteers</h1>
-            <p className="text-gray-600">Found {matches.length} match(es) to your opportunities</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Matched Volunteers</h1>
+            <p className="text-gray-600 dark:text-slate-400">Found {matches.length} match(es) to your opportunities</p>
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Matched Opportunities</h1>
-            <p className="text-gray-600">We found {matches.length} opportunity(ies) that match your skills and location</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Matched Opportunities</h1>
+            <p className="text-gray-600 dark:text-slate-400">We found {matches.length} opportunity(ies) that match your skills and location</p>
           </>
         )}
       </div>
@@ -171,11 +171,11 @@ const Matches = () => {
       {/* Sort Controls */}
       {matches.length > 0 && (
         <div className="mb-6 flex gap-3">
-          <label className="text-sm font-medium text-gray-700">Sort by:</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Sort by:</label>
           <select 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             <option value="score">Best Match</option>
             <option value="name">
@@ -187,30 +187,30 @@ const Matches = () => {
 
       {/* Empty State */}
       {matches.length === 0 ? (
-        <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300">
+        <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900 rounded-xl border-2 border-dashed border-gray-300 dark:border-slate-700">
           <div className="text-5xl mb-4">🎯</div>
           {user?.role === 'ngo' ? (
             <>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">No volunteer matches yet</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">No volunteer matches yet</h3>
+              <p className="text-gray-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
                 Create opportunities to start matching with volunteers!
               </p>
               <button 
                 onClick={() => navigate('/opportunities/create')} 
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
               >
                 Create an Opportunity
               </button>
             </>
           ) : (
             <>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">No matches found yet</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">No matches found yet</h3>
+              <p className="text-gray-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
                 We couldn't find opportunities matching your skills and location. Try updating your profile to get better matches!
               </p>
               <button 
                 onClick={() => navigate('/profile')} 
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+                className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
               >
                 Update Your Profile
               </button>
@@ -232,13 +232,13 @@ const Matches = () => {
               return (
                 <div 
                   key={`${opp._id}-${volunteer._id}-${idx}`} 
-                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-gray-200 flex flex-col"
+                  className="bg-white dark:bg-slate-800 rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-gray-200 dark:border-slate-700 flex flex-col"
                 >
                   {/* Match Score Badge */}
-                  <div className="relative bg-gradient-to-r from-emerald-50 to-blue-50 px-4 py-3 border-b border-gray-200">
+                  <div className="relative bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-900/30 dark:to-blue-900/30 px-4 py-3 border-b border-gray-200 dark:border-slate-700">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-gray-600 font-semibold">MATCH SCORE</p>
+                        <p className="text-xs text-gray-600 dark:text-slate-400 font-semibold">MATCH SCORE</p>
                         <div className="flex items-baseline gap-2">
                           <span 
                             className="text-3xl font-bold"
@@ -246,22 +246,22 @@ const Matches = () => {
                           >
                             {matchPercent}%
                           </span>
-                          <span className="text-xs text-gray-500">({matchScore} factors)</span>
+                          <span className="text-xs text-gray-500 dark:text-slate-500">({matchScore} factors)</span>
                         </div>
                       </div>
                       <div className="text-right">
                         {matchPercent >= 80 && (
-                          <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold">
+                          <div className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded-full text-xs font-bold">
                             ⭐ EXCELLENT
                           </div>
                         )}
                         {matchPercent >= 60 && matchPercent < 80 && (
-                          <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold">
+                          <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-bold">
                             👍 GOOD
                           </div>
                         )}
                         {matchPercent < 60 && (
-                          <div className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-bold">
+                          <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 px-2 py-1 rounded-full text-xs font-bold">
                             📌 POSSIBLE
                           </div>
                         )}
@@ -269,7 +269,7 @@ const Matches = () => {
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="mt-3 w-full bg-gray-300 rounded-full h-2 overflow-hidden">
+                    <div className="mt-3 w-full bg-gray-300 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
                       <div 
                         className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${matchPercent}%`, backgroundColor: matchColor }}
@@ -279,37 +279,37 @@ const Matches = () => {
 
                   {/* Content Section */}
                   <div className="px-4 py-4 flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                       {volunteer.name}
                     </h3>
 
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-gray-500 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
-                        <p className="text-sm text-gray-700 font-medium">{volunteer.location}</p>
+                        <p className="text-sm text-gray-700 dark:text-slate-300 font-medium">{volunteer.location}</p>
                       </div>
                     </div>
 
                     {/* Opportunity Info */}
-                    <div className="mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                      <p className="text-xs font-semibold text-emerald-900 mb-1">MATCHED FOR OPPORTUNITY:</p>
-                      <p className="text-sm font-medium text-emerald-800">{opp.title}</p>
+                    <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg border border-emerald-200 dark:border-emerald-700">
+                      <p className="text-xs font-semibold text-emerald-900 dark:text-emerald-300 mb-1">MATCHED FOR OPPORTUNITY:</p>
+                      <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">{opp.title}</p>
                     </div>
 
                     {/* Match Reason */}
-                    <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-xs font-semibold text-blue-900 mb-2">WHY THIS MATCH:</p>
+                    <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+                      <p className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-2">WHY THIS MATCH:</p>
                       <div className="space-y-1">
                         {matchScore >= 2 && (
-                          <p className="text-xs text-blue-800">✓ Skills alignment ({matchScore - 1} matching skills)</p>
+                          <p className="text-xs text-blue-800 dark:text-blue-200">✓ Skills alignment ({matchScore - 1} matching skills)</p>
                         )}
                         {matchScore % 2 === 1 && matchScore >= 1 && (
-                          <p className="text-xs text-blue-800">✓ Location match</p>
+                          <p className="text-xs text-blue-800 dark:text-blue-200">✓ Location match</p>
                         )}
                         {matchScore === 0 && (
-                          <p className="text-xs text-blue-800">📍 Available volunteer - consider for this opportunity</p>
+                          <p className="text-xs text-blue-800 dark:text-blue-200">📍 Available volunteer - consider for this opportunity</p>
                         )}
                       </div>
                     </div>
@@ -317,18 +317,18 @@ const Matches = () => {
                     {/* Skills Tags */}
                     {volunteer.skills && volunteer.skills.length > 0 && (
                       <div className="mb-4">
-                        <p className="text-xs font-semibold text-gray-700 mb-2">VOLUNTEER SKILLS:</p>
+                        <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 mb-2">VOLUNTEER SKILLS:</p>
                         <div className="flex flex-wrap gap-1">
                           {volunteer.skills.slice(0, 3).map((skill, idx) => (
                             <span 
                               key={idx}
-                              className="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full font-medium"
+                              className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 px-2 py-1 rounded-full font-medium"
                             >
                               {skill}
                             </span>
                           ))}
                           {volunteer.skills.length > 3 && (
-                            <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full font-medium">
+                            <span className="text-xs bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-300 px-2 py-1 rounded-full font-medium">
                               +{volunteer.skills.length - 3} more
                             </span>
                           )}
@@ -338,10 +338,10 @@ const Matches = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="px-4 py-4 border-t border-gray-200 bg-gray-50 flex gap-3">
+                  <div className="px-4 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 flex gap-3">
                     <button 
                       onClick={() => navigate(`/chat/${volunteer._id}`)}
-                      className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors text-sm"
+                      className="flex-1 px-4 py-2 bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white font-medium rounded-lg transition-colors text-sm"
                     >
                       💬 Chat
                     </button>
@@ -353,13 +353,13 @@ const Matches = () => {
               return (
                 <div 
                   key={opp._id} 
-                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-gray-200 flex flex-col"
+                  className="bg-white dark:bg-slate-800 rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-gray-200 dark:border-slate-700 flex flex-col"
                 >
                   {/* Match Score Badge */}
-                  <div className="relative bg-gradient-to-r from-emerald-50 to-blue-50 px-4 py-3 border-b border-gray-200">
+                  <div className="relative bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-900/30 dark:to-blue-900/30 px-4 py-3 border-b border-gray-200 dark:border-slate-700">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-gray-600 font-semibold">MATCH SCORE</p>
+                        <p className="text-xs text-gray-600 dark:text-slate-400 font-semibold">MATCH SCORE</p>
                         <div className="flex items-baseline gap-2">
                           <span 
                             className="text-3xl font-bold"
@@ -367,22 +367,22 @@ const Matches = () => {
                           >
                             {matchPercent}%
                           </span>
-                          <span className="text-xs text-gray-500">({matchScore} factors)</span>
+                          <span className="text-xs text-gray-500 dark:text-slate-500">({matchScore} factors)</span>
                         </div>
                       </div>
                       <div className="text-right">
                         {matchPercent >= 80 && (
-                          <div className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold">
+                          <div className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded-full text-xs font-bold">
                             ⭐ EXCELLENT
                           </div>
                         )}
                         {matchPercent >= 60 && matchPercent < 80 && (
-                          <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold">
+                          <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-bold">
                             👍 GOOD
                           </div>
                         )}
                         {matchPercent < 60 && (
-                          <div className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-bold">
+                          <div className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 px-2 py-1 rounded-full text-xs font-bold">
                             📌 POSSIBLE
                           </div>
                         )}
@@ -390,7 +390,7 @@ const Matches = () => {
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="mt-3 w-full bg-gray-300 rounded-full h-2 overflow-hidden">
+                    <div className="mt-3 w-full bg-gray-300 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
                       <div 
                         className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${matchPercent}%`, backgroundColor: matchColor }}
@@ -400,35 +400,35 @@ const Matches = () => {
 
                   {/* Content Section */}
                   <div className="px-4 py-4 flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
                       {opp.title}
                     </h3>
                     
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-gray-500 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
-                        <p className="text-sm text-gray-700 font-medium">{opp.location}</p>
+                        <p className="text-sm text-gray-700 dark:text-slate-300 font-medium">{opp.location}</p>
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-gray-500 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a4 4 0 00-4-4h-2.5a4 4 0 00-4 4v1h10.5z" />
                         </svg>
-                        <p className="text-sm text-gray-700 font-medium">{opp.ngo_id?.name || "WasteZero Partner"}</p>
+                        <p className="text-sm text-gray-700 dark:text-slate-300 font-medium">{opp.ngo_id?.name || "WasteZero Partner"}</p>
                       </div>
                     </div>
 
                     {/* Match Reason */}
-                    <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-xs font-semibold text-blue-900 mb-2">WHY THIS MATCH:</p>
+                    <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <p className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-2">WHY THIS MATCH:</p>
                       <div className="space-y-1">
                         {matchScore > 1 && (
-                          <p className="text-xs text-blue-800">✓ Skills alignment ({matchScore - 1} matching skills)</p>
+                          <p className="text-xs text-blue-800 dark:text-blue-200">✓ Skills alignment ({matchScore - 1} matching skills)</p>
                         )}
                         {matchScore > 0 && (
-                          <p className="text-xs text-blue-800">✓ Location match</p>
+                          <p className="text-xs text-blue-800 dark:text-blue-200">✓ Location match</p>
                         )}
                       </div>
                     </div>
@@ -436,18 +436,18 @@ const Matches = () => {
                     {/* Skills Tags */}
                     {opp.required_skills && opp.required_skills.length > 0 && (
                       <div className="mb-4">
-                        <p className="text-xs font-semibold text-gray-700 mb-2">REQUIRED SKILLS:</p>
+                        <p className="text-xs font-semibold text-gray-700 dark:text-slate-300 mb-2">REQUIRED SKILLS:</p>
                         <div className="flex flex-wrap gap-1">
                           {opp.required_skills.slice(0, 3).map((skill, idx) => (
                             <span 
                               key={idx}
-                              className="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full font-medium"
+                              className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 px-2 py-1 rounded-full font-medium"
                             >
                               {skill}
                             </span>
                           ))}
                           {opp.required_skills.length > 3 && (
-                            <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full font-medium">
+                            <span className="text-xs bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-300 px-2 py-1 rounded-full font-medium">
                               +{opp.required_skills.length - 3} more
                             </span>
                           )}
@@ -457,16 +457,16 @@ const Matches = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="px-4 py-4 border-t border-gray-200 bg-gray-50 flex gap-3">
+                  <div className="px-4 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700 flex gap-3">
                     <button 
                       onClick={() => navigate(`/opportunities/${opp._id}`)}
-                      className="flex-1 px-4 py-2 bg-white border border-emerald-600 text-emerald-600 font-medium rounded-lg hover:bg-emerald-50 transition-colors text-sm"
+                      className="flex-1 px-4 py-2 bg-white dark:bg-slate-600 border border-emerald-600 dark:border-emerald-500 text-emerald-600 dark:text-emerald-300 font-medium rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors text-sm"
                     >
                       View Details
                     </button>
                     <button 
                       onClick={() => navigate(`/chat/${opp.ngo_id?._id}`)}
-                      className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors text-sm"
+                      className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-medium rounded-lg transition-colors text-sm"
                     >
                       💬 Chat
                     </button>

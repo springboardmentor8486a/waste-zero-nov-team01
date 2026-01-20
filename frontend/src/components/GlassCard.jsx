@@ -11,6 +11,12 @@ const GlassCard = ({ children }) => {
         backdropFilter: "blur(20px)",
         boxShadow: "0 18px 40px rgba(0,0,0,0.22)",
       }}
+      onLoad={(e) => {
+        if (document.documentElement.classList.contains('dark')) {
+          e.target.style.background = "rgba(30, 41, 59, 0.8)";
+          e.target.style.boxShadow = "0 18px 40px rgba(0,0,0,0.5)";
+        }
+      }}
     >
       {children}
     </div>

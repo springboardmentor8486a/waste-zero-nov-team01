@@ -8,25 +8,13 @@ function OpportunityDetails() {
 
   const [opportunity, setOpportunity] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const { user } = useAuth();
 
   // 🔹 matches state (NGO Match View)
   const [matches, setMatches] = useState([]);
   const [matchesLoading, setMatchesLoading] = useState(true);
-
-  const dummy = {
-    _id: id,
-    title: "Beach Cleanup Drive",
-    description:
-      "Join us for a day of cleaning up the shoreline and protecting marine life.",
-    location: "Hyderabad, Telangana",
-    required_skills: ["Teamwork", "Physical stamina"],
-    status: "open",
-    date: "2025-06-20",
-    duration: "4 hours",
-    postedBy: "NGO ID - 17",
-  };
 
   useEffect(() => {
     fetchOpportunity();
@@ -48,16 +36,19 @@ function OpportunityDetails() {
       );
 
       if (!res.ok) {
-        console.warn("API error, showing dummy opportunity");
-        setOpportunity(dummy);
+        const text = `Failed to load opportunity (${res.status})`;
+        console.warn('OpportunityDetails: ' + text);
+        setError(text);
+        setOpportunity(null);
         return;
       }
 
       const data = await res.json();
-      setOpportunity(data || dummy);
+      setOpportunity(data || null);
     } catch (err) {
       console.error("Fetch opportunity error:", err);
-      setOpportunity(dummy);
+      setError(err.message || 'Failed to load opportunity');
+      setOpportunity(null);
     } finally {
       setLoading(false);
     }
@@ -135,15 +126,15 @@ function OpportunityDetails() {
     }
   };
 
-  if (loading || !opportunity) {
-    return (
-      <div className="p-8 text-center text-gray-600">
-        Loading opportunity...
-      </div>
-    );
+  if (loading) {
+    return <div className="p-8 text-center text-gray-600">Loading opportunity...</div>;
   }
 
-  const effectiveId = opportunity._id || dummy._id;
+  if (error) {
+    return <div className="p-8 text-center text-rose-600">{error}</div>;
+  }
+
+  const effectiveId = opportunity._id;
   const skills =
     opportunity.required_skills ||
     opportunity.requiredSkills ||
@@ -162,7 +153,7 @@ function OpportunityDetails() {
       {/* Title + status */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-slate-100 mb-1">
             {opportunity.title}
           </h1>
           <p className="text-xs text-gray-500">
@@ -174,15 +165,19 @@ function OpportunityDetails() {
 
       {/* Location map */}
       <div className="mb-6">
-        <iframe
-          title="Opportunity location map"
-          src={`https://www.google.com/maps?q=${encodeURIComponent(
-            opportunity.location || dummy.location
-          )}&output=embed`}
-          className="w-full h-64 rounded-xl border-0"
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
+        {opportunity.location ? (
+          <iframe
+            title="Opportunity location map"
+            src={`https://www.google.com/maps?q=${encodeURIComponent(opportunity.location)}&output=embed`}
+            className="w-full h-64 rounded-xl border-0"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        ) : (
+          <div className="w-full h-64 rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-sm text-slate-500">
+            Location not specified
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -256,23 +251,19 @@ function OpportunityDetails() {
 
           <DetailRow
             label="Date"
-            value={
-              opportunity.date
-                ? new Date(opportunity.date).toLocaleDateString()
-                : dummy.date
-            }
+            value={opportunity.date ? new Date(opportunity.date).toLocaleDateString() : "Not specified"}
           />
           <DetailRow
             label="Duration"
-            value={opportunity.duration || dummy.duration}
+            value={opportunity.duration || "Not specified"}
           />
           <DetailRow
             label="Location"
-            value={opportunity.location || dummy.location}
+            value={opportunity.location || "Not specified"}
           />
           <DetailRow
             label="Posted by"
-            value={opportunity.postedBy || dummy.postedBy}
+            value={opportunity.postedBy || "Unknown"}
           />
 
           {/* 🔹 Matched volunteers list */}

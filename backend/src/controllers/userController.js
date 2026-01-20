@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const User = require("../models/user");
 
 // GET /api/users/me
 // returns the currently logged-in user's profile
@@ -106,5 +106,67 @@ exports.getUserById = async (req, res) => {
   } catch (err) {
     console.error("getUserById error:", err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// GET /api/users/me/wishlist  -> get user's wishlist (volunteer)
+exports.getMyWishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('wishlist', 'title date location');
+    res.json({ wishlist: user.wishlist || [] });
+  } catch (err) {
+    console.error('getMyWishlist error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// POST /api/users/me/wishlist   -> add to wishlist
+exports.addToWishlist = async (req, res) => {
+  try {
+    const { opportunityId } = req.body;
+    if (!opportunityId) return res.status(400).json({ message: 'opportunityId required' });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (!user.wishlist) user.wishlist = [];
+    if (!user.wishlist.some(id => String(id) === String(opportunityId))) {
+      user.wishlist.push(opportunityId);
+      await user.save();
+    }
+
+    res.status(200).json({ message: 'Added to wishlist', wishlist: user.wishlist });
+  } catch (err) {
+    console.error('addToWishlist error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// DELETE /api/users/me/wishlist/:opportunityId  -> remove from wishlist
+exports.removeFromWishlist = async (req, res) => {
+  try {
+    const { opportunityId } = req.params;
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.wishlist = (user.wishlist || []).filter(id => String(id) !== String(opportunityId));
+    await user.save();
+
+    res.status(200).json({ message: 'Removed from wishlist', wishlist: user.wishlist });
+  } catch (err) {
+    console.error('removeFromWishlist error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// GET /api/users/me/joined  -> get opportunities the user joined
+exports.getMyJoined = async (req, res) => {
+  try {
+    const Opportunity = require('../models/Opportunity');
+    const joined = await Opportunity.find({ 'participants.user': req.user._id }).populate('ngo_id', '_id name location');
+    res.json({ joined });
+  } catch (err) {
+    console.error('getMyJoined error:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 };

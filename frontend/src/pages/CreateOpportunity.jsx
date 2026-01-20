@@ -93,8 +93,10 @@ function CreateOpportunity() {
     width: "100%",
     padding: "10px 12px",
     borderRadius: "8px",
-    border: "1px solid #d1d5db",
+    border: document.documentElement.classList.contains('dark') ? "1px solid #475569" : "1px solid #d1d5db",
     fontSize: "15px",
+    backgroundColor: document.documentElement.classList.contains('dark') ? "#1e293b" : "#ffffff",
+    color: document.documentElement.classList.contains('dark') ? "#e2e8f0" : "#000000",
     boxSizing: "border-box",
     marginTop: "4px",
   };
@@ -103,7 +105,7 @@ function CreateOpportunity() {
     display: "block",
     fontSize: "14px",
     fontWeight: 600,
-    color: "#01050bff",
+    color: document.documentElement.classList.contains('dark') ? "#cbd5e1" : "#01050bff",
   };
 
   return (
@@ -112,6 +114,8 @@ function CreateOpportunity() {
         padding: "32px 16px",
         maxWidth: "640px",
         margin: "0 auto",
+        backgroundColor: document.documentElement.classList.contains('dark') ? "#0f172a" : "#ffffff",
+        minHeight: "100vh",
       }}
     >
 {/* Back link + main heading */}
@@ -123,7 +127,7 @@ function CreateOpportunity() {
     style={{
       border: "none",
       background: "none",
-      color: "#4b5563",
+      color: document.documentElement.classList.contains('dark') ? "#94a3b8" : "#4b5563",
       fontSize: "14px",
       cursor: "pointer",
       marginBottom: "8px",
@@ -139,7 +143,7 @@ function CreateOpportunity() {
     style={{
       fontSize: "26px",
       fontWeight: "bold",
-      color: "#080e0a",
+      color: document.documentElement.classList.contains('dark') ? "#ffffff" : "#080e0a",
       margin: 0,
     }}
   >
@@ -150,12 +154,13 @@ function CreateOpportunity() {
       {error && (
         <div
           style={{
-            backgroundColor: "#fee2e2",
-            color: "#b91c1c",
+            backgroundColor: document.documentElement.classList.contains('dark') ? "#7f1d1d" : "#fee2e2",
+            color: document.documentElement.classList.contains('dark') ? "#fca5a5" : "#b91c1c",
             padding: "10px 12px",
             borderRadius: "8px",
             marginBottom: "16px",
             fontSize: "14px",
+            border: document.documentElement.classList.contains('dark') ? "1px solid #991b1b" : "1px solid #fecaca",
           }}
         >
           {error}

@@ -12,13 +12,12 @@ import { Toaster } from "react-hot-toast";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
 import ProtectedRoute from "./components/ProtectedRoute";
 
-
 import DashboardLayout from "./layouts/DashboardLayout";
-import Dashboard from "./pages/Dashboard";
 import Ngodashboard from "./pages/NGODashboard";
+import VolunteerDashboard from "./pages/VolunteerDashboard";
+
 import Opportunities from "./pages/Opportunities";
 import OpportunityDetails from "./pages/OpportunityDetails";
 import CreateOpportunity from "./pages/CreateOpportunity";
@@ -27,13 +26,19 @@ import EditOpportunity from "./pages/EditOpportunity";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Messages from "./pages/Messages";
-import SchedulePickup from "./pages/SchedulePickup";
+import Help from "./pages/Help";
 import Changepassword from "./pages/Changepassword";
 import Matches from "./pages/Matches";
-
 import Chat from "./pages/Chat";
-import VolunteerDashboard from "./pages/VolunteerDashboard";
 
+// ADMIN PAGES
+import RequireAdmin from "./utils/requireAdmin.jsx";
+import AdminLayout from "./pages/admin/AdminLayout.jsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import UserManagement from "./pages/admin/UserManagement.jsx";
+import OpportunityModeration from "./pages/admin/OpportunityModeration.jsx";
+import ReportsAnalytics from "./pages/admin/ReportsAnalytics.jsx";
+import AdminLogs from "./pages/admin/AdminLogs.jsx";
 
 function App() {
   return (
@@ -42,11 +47,27 @@ function App() {
         <ThemeProvider>
           <Router>
             <Routes>
-              {/* PUBLIC ROUTES */}
+              {/* ================= PUBLIC ROUTES ================= */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
-              {/* SHARED LAYOUT (SIDEBAR + TOPBAR) */}
+              {/* ================= ADMIN ROUTES ================= */}
+              <Route
+                path="/admin/*"
+                element={
+                  <RequireAdmin>
+                    <AdminLayout />
+                  </RequireAdmin>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="opportunities" element={<OpportunityModeration />} />
+                <Route path="reports" element={<ReportsAnalytics />} />
+                <Route path="logs" element={<AdminLogs />} />
+              </Route>
+
+              {/* ================= NGO + VOLUNTEER ROUTES ================= */}
               <Route
                 path="/"
                 element={
@@ -55,7 +76,7 @@ function App() {
                   </ProtectedRoute>
                 }
               >
-                {/* ADMIN / NGO DASHBOARD */}
+                {/* NGO DASHBOARD */}
                 <Route
                   index
                   element={
@@ -84,12 +105,9 @@ function App() {
                 />
 
                 {/* OLD NGO PATH → REDIRECT */}
-                <Route
-                  path="ngo/dashboard"
-                  element={<Navigate to="/dashboard" replace />}
-                />
+                <Route path="ngo/dashboard" element={<Navigate to="/dashboard" replace />} />
 
-                {/* OPPORTUNITIES SECTION (ngo/admin only) */}
+                {/* OPPORTUNITIES */}
                 <Route
                   path="opportunities"
                   element={
@@ -122,26 +140,20 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                
 
-                {/* MATCHES + MESSAGES + CHAT (common) */}
+                {/* MATCHES / MESSAGES / CHAT */}
                 <Route
                   path="matches"
                   element={
-                    <ProtectedRoute
-                      allowedRoles={["volunteer",  "ngo"]}
-                    >
+                    <ProtectedRoute allowedRoles={["volunteer", "ngo"]}>
                       <Matches />
                     </ProtectedRoute>
                   }
                 />
-                
                 <Route
                   path="messages"
                   element={
-                    <ProtectedRoute
-                      allowedRoles={["volunteer",  "ngo"]}
-                    >
+                    <ProtectedRoute allowedRoles={["volunteer", "ngo"]}>
                       <Messages />
                     </ProtectedRoute>
                   }
@@ -149,21 +161,17 @@ function App() {
                 <Route
                   path="chat/:receiverId"
                   element={
-                    <ProtectedRoute
-                      allowedRoles={["volunteer","ngo"]}
-                    >
+                    <ProtectedRoute allowedRoles={["volunteer", "ngo"]}>
                       <Chat />
                     </ProtectedRoute>
                   }
                 />
 
-                {/* USER PAGES */}
+                {/* USER SETTINGS */}
                 <Route
                   path="profile"
                   element={
-                    <ProtectedRoute
-                      allowedRoles={["volunteer", "ngo"]}
-                    >
+                    <ProtectedRoute allowedRoles={["volunteer", "ngo"]}>
                       <Profile />
                     </ProtectedRoute>
                   }
@@ -171,35 +179,34 @@ function App() {
                 <Route
                   path="settings"
                   element={
-                    <ProtectedRoute
-                      allowedRoles={["volunteer",  "ngo"]}
-                    >
+                    <ProtectedRoute allowedRoles={["volunteer", "ngo"]}>
                       <Settings />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="schedule-pickup"
-                  element={
-                    <ProtectedRoute allowedRoles={["ngo"]}>
-                      <SchedulePickup />
                     </ProtectedRoute>
                   }
                 />
                 <Route
                   path="change-password"
                   element={
-                    <ProtectedRoute
-                      allowedRoles={["volunteer",  "ngo"]}
-                    >
+                    <ProtectedRoute allowedRoles={["volunteer", "ngo"]}>
                       <Changepassword />
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="help"
+                  element={
+                    <ProtectedRoute allowedRoles={["volunteer", "ngo"]}>
+                      <Help />
+                    </ProtectedRoute>
+                  }
+                />
               </Route>
+
+              {/* ================= CATCH-ALL ================= */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
 
-            {/* Global Toaster */}
+            {/* GLOBAL TOASTER */}
             <Toaster
               position="top-right"
               toastOptions={{

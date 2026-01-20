@@ -68,7 +68,7 @@ exports.getOpportunityById = async (req, res, next) => {
     const opp = await Opportunity.findById(req.params.id).populate(
       "ngo_id",
       "_id name location"
-    );
+    ).populate('participants.user', '_id name');
 
     if (!opp)
       return res.status(404).json({ message: "Opportunity not found" });
@@ -76,6 +76,51 @@ exports.getOpportunityById = async (req, res, next) => {
     res.json(opp);
   } catch (err) {
     res.status(400).json({ message: "Invalid ID" });
+  }
+};
+
+// @desc    Volunteer joins an opportunity
+// @route   POST /api/opportunities/:id/join
+exports.joinOpportunity = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const opp = await Opportunity.findById(req.params.id);
+    if (!opp) return res.status(404).json({ message: 'Opportunity not found' });
+
+    // Check if already joined
+    const already = (opp.participants || []).some(p => String(p.user) === String(userId));
+    if (already) return res.status(400).json({ message: 'Already joined' });
+
+    opp.participants = opp.participants || [];
+    opp.participants.push({ user: userId, joinedAt: new Date() });
+    await opp.save();
+
+    // return minimal info to frontend
+    res.status(200).json({ message: 'Joined opportunity', participantsCount: opp.participants.length });
+  } catch (err) {
+    console.error('joinOpportunity error:', err);
+    next(err);
+  }
+};
+
+// @desc    Volunteer leaves an opportunity (remove join)
+// @route   DELETE /api/opportunities/:id/join
+exports.leaveOpportunity = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const opp = await Opportunity.findById(req.params.id);
+    if (!opp) return res.status(404).json({ message: 'Opportunity not found' });
+
+    const before = opp.participants ? opp.participants.length : 0;
+    opp.participants = (opp.participants || []).filter(p => String(p.user) !== String(userId));
+    const after = opp.participants.length;
+    if (before === after) return res.status(400).json({ message: 'You have not joined this opportunity' });
+
+    await opp.save();
+    res.status(200).json({ message: 'Left opportunity', participantsCount: opp.participants.length });
+  } catch (err) {
+    console.error('leaveOpportunity error:', err);
+    next(err);
   }
 };
 

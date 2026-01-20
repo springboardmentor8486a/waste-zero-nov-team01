@@ -12,16 +12,13 @@ function Dashboard() {
     newMessages: 0
   });
 
-  // Note: Dashboard stats endpoint not yet implemented in backend
-  // Admin stats will be added in future phases
+  // Will fetch dashboard stats when the backend endpoint is available
   useEffect(() => {
-    // fetchDashboardStats(); // Disabled - endpoint not yet available
-    // For now, using mock data defined in state
+    // fetchDashboardStats(); // enable when endpoint is implemented
   }, []);
 
-  // Mock refresh - shows mock data since backend endpoint doesn't exist yet
   const handleRefreshStats = () => {
-    console.log('Stats would be refreshed when endpoint is implemented');
+    console.log('Refresh will call dashboard stats API when implemented');
   };
 
   const statCards = [
@@ -142,9 +139,7 @@ function Dashboard() {
               <span>🎯</span> Recent Matches
             </h3>
             <div className="space-y-4">
-              {[1,2,3].map((i) => (
-                <RecentMatchItem key={i} />
-              ))}
+              <div className="p-6 text-sm text-slate-500 text-center border border-dashed rounded">No recent matches to display.</div>
             </div>
           </div>
 

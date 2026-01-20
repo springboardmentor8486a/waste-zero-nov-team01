@@ -34,6 +34,13 @@ const opportunitySchema = new mongoose.Schema(
       enum: ["open", "closed", "in-progress"],
       default: "open",
     },
+    // participants: list of volunteers who joined this opportunity
+    participants: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        joinedAt: { type: Date, default: Date.now }
+      }
+    ],
     ngo_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
