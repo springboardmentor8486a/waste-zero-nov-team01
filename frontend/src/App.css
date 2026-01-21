@@ -1,0 +1,26 @@
+@import "tailwindcss";
+/* Global font */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* Full-screen background for auth pages */
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40px;
+  background-image: url("https://media.istockphoto.com/id/1455668147/photo/zero-waste-net-zero-concept-carbon-neutral-climate-neutral-long-term-strategy-sustainable.jpg?s=612x612&w=0&k=20&c=YBrE2lS9cmI2n0ELPYFNCNtZ9feyMV-N9sCrJi4LWNg=");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Optionally, style for links inside cards */
+a {
+  text-decoration: none;
+}
